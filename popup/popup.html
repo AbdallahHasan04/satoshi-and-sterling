@@ -36,6 +36,8 @@
       <button type="button" role="tab" id="tab-crypto" data-tab="crypto" aria-controls="panel-crypto">Crypto</button>
       <button type="button" role="tab" id="tab-stocks" data-tab="stocks" aria-controls="panel-stocks">Stocks</button>
       <button type="button" role="tab" id="tab-favs" data-tab="favs" aria-controls="panel-favs">Favourites</button>
+      <button type="button" role="tab" id="tab-sanalysis" data-tab="sanalysis" aria-controls="panel-sanalysis">Stock analysis</button>
+      <button type="button" role="tab" id="tab-canalysis" data-tab="canalysis" aria-controls="panel-canalysis">Crypto analysis</button>
     </div>
 
     <section id="panel-convert" role="tabpanel" aria-labelledby="tab-convert">
@@ -112,7 +114,10 @@
       <div id="crypto-detail" hidden>
         <div class="detail-nav">
           <button type="button" id="cd-back" class="back-btn">‹ All coins</button>
-          <span id="cd-rank" class="detail-rank"></span>
+          <span class="detail-nav-right">
+            <button type="button" id="cd-analyse" class="an-link">Analyse ›</button>
+            <span id="cd-rank" class="detail-rank"></span>
+          </span>
         </div>
         <div class="detail-coin">
           <span id="cd-icon"></span>
@@ -184,7 +189,10 @@
       <div id="stock-detail" hidden>
         <div class="detail-nav">
           <button type="button" id="sd-back" class="back-btn">‹ All stocks</button>
-          <span id="sd-exchange" class="detail-rank"></span>
+          <span class="detail-nav-right">
+            <button type="button" id="sd-analyse" class="an-link">Analyse ›</button>
+            <span id="sd-exchange" class="detail-rank"></span>
+          </span>
         </div>
         <div class="detail-coin">
           <span id="sd-icon"></span>
@@ -241,6 +249,23 @@
       </div>
       <div id="favs-status" class="status"></div>
     </section>
+    <section id="panel-sanalysis" role="tabpanel" aria-labelledby="tab-sanalysis" hidden>
+      <div class="an-search">
+        <input type="search" id="sa-search" class="search-input" placeholder="Analyse a US stock or ETF…" autocomplete="off" spellcheck="false" aria-label="Search a stock to analyse">
+        <ul id="sa-results" class="an-results" hidden></ul>
+      </div>
+      <div id="sa-body" class="an-body"></div>
+      <div id="sa-status" class="status"></div>
+    </section>
+
+    <section id="panel-canalysis" role="tabpanel" aria-labelledby="tab-canalysis" hidden>
+      <div class="an-search">
+        <input type="search" id="ca-search" class="search-input" placeholder="Analyse a coin…" autocomplete="off" spellcheck="false" aria-label="Search a coin to analyse">
+        <ul id="ca-results" class="an-results" hidden></ul>
+      </div>
+      <div id="ca-body" class="an-body"></div>
+      <div id="ca-status" class="status"></div>
+    </section>
   </main>
 
   <footer class="foot">
@@ -248,7 +273,9 @@
       <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">Rates By Exchange Rate API</a> ·
       <a href="https://coinpaprika.com" target="_blank" rel="noopener">CoinPaprika</a> ·
       <a href="https://www.binance.com" target="_blank" rel="noopener">Binance</a> ·
-      <a href="https://finance.yahoo.com" target="_blank" rel="noopener">Yahoo Finance</a>
+      <a href="https://finance.yahoo.com" target="_blank" rel="noopener">Yahoo Finance</a> ·
+      <a href="https://www.sec.gov/edgar" target="_blank" rel="noopener">SEC</a> ·
+      <a href="https://www.cboe.com" target="_blank" rel="noopener">Cboe</a>
     </span>
   </footer>
 </body>

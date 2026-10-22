@@ -1,4 +1,5 @@
 import * as store from '../lib/storage.js';
+import { ext } from '../lib/ext.js';
 import { getFiat, getCoins, refreshCoinPrices, usdPerUnit } from '../lib/rates.js';
 import { buildCatalog, isCrypto, coinId } from '../lib/currencies.js';
 import { parseSelection } from '../lib/parse.js';
@@ -8,11 +9,11 @@ import { MAX_DIGITS } from '../lib/config.js';
 
 const MENU_ID = 'convert-selection';
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({ id: MENU_ID, title: 'Convert “%s”', contexts: ['selection'] });
+ext.runtime.onInstalled.addListener(() => {
+  ext.contextMenus.create({ id: MENU_ID, title: 'Convert “%s”', contexts: ['selection'] });
 });
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+ext.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== MENU_ID) return;
   convertSelection(info.selectionText ?? '', tab).catch(err => {
     console.error(err);
@@ -83,12 +84,12 @@ async function convertSelection(text, tab) {
 
 async function notify(tab, message) {
   try {
-    await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: showToast, args: [message] });
+    await ext.scripting.executeScript({ target: { tabId: tab.id }, func: showToast, args: [message] });
   } catch {
-    // Pages like brave://, chrome:// and the Web Store can't be scripted: open the popup instead.
-    await chrome.action.setBadgeBackgroundColor({ color: message.error ? '#c93030' : '#0b8f63' });
-    await chrome.action.setBadgeText({ text: message.error ? '!' : '1' });
-    try { await chrome.action.openPopup?.(); } catch { /* not allowed here: the badge tells the user to open it */ }
+    // Browser pages (brave://, chrome://, about:) and the add-on stores can't be scripted: open the popup instead.
+    await ext.action.setBadgeBackgroundColor({ color: message.error ? '#c93030' : '#0b8f63' });
+    await ext.action.setBadgeText({ text: message.error ? '!' : '1' });
+    try { await ext.action.openPopup?.(); } catch { /* not allowed here: the badge tells the user to open it */ }
   }
 }
 

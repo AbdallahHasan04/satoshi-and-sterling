@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Satoshi & Sterling: Currency & Crypto Converter",
-  "version": "1.1.0",
+  "name": "Satoshi & Sterling: Currency Converter, Crypto & Stocks",
+  "version": "1.2.0",
   "description": "Convert 160+ currencies, track ~2,000 cryptocurrencies and US stocks live, and keep your favourites in one place.",
   "icons": {
     "16": "icons/icon-16.png",
@@ -38,7 +38,9 @@
     "https://query1.finance.yahoo.com/*",
     "https://query2.finance.yahoo.com/*",
     "https://api.coinpaprika.com/*",
-    "https://api.binance.com/*"
+    "https://api.binance.com/*",
+    "https://data.sec.gov/*",
+    "https://cdn-api.cboe.com/*"
   ],
   "optional_host_permissions": [
     "https://open.er-api.com/*",
@@ -47,7 +49,9 @@
     "https://query1.finance.yahoo.com/*",
     "https://query2.finance.yahoo.com/*",
     "https://api.coinpaprika.com/*",
-    "https://api.binance.com/*"
+    "https://api.binance.com/*",
+    "https://data.sec.gov/*",
+    "https://cdn-api.cboe.com/*"
   ],
   "minimum_chrome_version": "111"
 }

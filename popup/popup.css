@@ -19,7 +19,9 @@ body {
   white-space: nowrap;
 }
 .tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
   margin-bottom: 12px;
   padding: 3px;
   border-radius: 9px;
@@ -692,6 +694,170 @@ button.asset-main:hover { background: var(--surface-2); }
 @keyframes flash-up { from { background: color-mix(in srgb, var(--up) 30%, transparent); } }
 @keyframes flash-down { from { background: color-mix(in srgb, var(--down) 30%, transparent); } }
 .asset-price b, .fav-card-value, .big-price, .rate-grid b { border-radius: 4px; }
+
+/* ---------- Analysis tabs ---------- */
+.detail-nav-right { display: flex; align-items: center; gap: 6px; }
+.an-link {
+  padding: 2px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
+.an-link:hover { background: var(--accent); color: var(--accent-ink); }
+
+.an-search { position: relative; margin-bottom: 10px; }
+.an-search .search-input { width: 100%; }
+.an-results {
+  position: absolute;
+  z-index: 15;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  list-style: none;
+}
+.an-results button {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  width: 100%;
+  padding: 6px 12px;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+.an-results button:hover { background: var(--surface-2); }
+.an-results b { font: 700 13px var(--mono); }
+.an-results small { overflow: hidden; color: var(--muted); white-space: nowrap; text-overflow: ellipsis; }
+
+.an-body { display: flex; flex-direction: column; gap: 10px; }
+.an-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  align-items: center;
+}
+.an-head-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.an-head-text b { overflow: hidden; font-size: 16px; white-space: nowrap; text-overflow: ellipsis; }
+.an-head-text small { color: var(--muted); font: 600 12px var(--mono); }
+.an-head-price { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-variant-numeric: tabular-nums; }
+.an-head-price b { font-size: 18px; }
+.an-open { grid-column: 1 / -1; justify-self: start; font-size: 12px; }
+
+.an-score { padding: 10px 12px; }
+.an-score-head { display: flex; justify-content: space-between; align-items: baseline; }
+.an-score-pct { color: var(--muted); font-weight: 700; }
+.an-bar { height: 7px; margin: 7px 0 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.an-bar span { display: block; height: 100%; border-radius: inherit; }
+.an-bar .is-good { background: var(--up); }
+.an-bar .is-mid { background: var(--warn); }
+.an-bar .is-bad { background: var(--down); }
+.an-disclaimer { margin: 0; color: var(--muted); font-size: 11px; }
+
+.an-section { padding: 8px 12px 10px; }
+.an-title {
+  margin: 2px 0 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.an-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+}
+.an-row + .an-row { border-top: 1px solid var(--border); }
+.an-label { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.an-label span { font-size: 13px; font-weight: 600; }
+.an-label small { color: var(--muted); font-size: 11px; }
+.an-value {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.an-chip {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+}
+.an-chip.is-pass { background: color-mix(in srgb, var(--up) 20%, transparent); color: var(--up); }
+.an-chip.is-fail { background: color-mix(in srgb, var(--down) 20%, transparent); color: var(--down); }
+.an-chip.is-info { background: var(--surface-2); color: var(--muted); }
+.an-note { margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.35; }
+.an-message { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.an-message.is-loading { padding: 30px 0; text-align: center; }
+
+/* Open interest by strike: puts grow left, calls grow right. */
+.an-legend { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; font-weight: 600; }
+.an-legend .is-put { color: var(--up); }
+.an-legend .is-call { color: var(--down); }
+.oi-row {
+  display: grid;
+  grid-template-columns: 1fr 64px 1fr;
+  align-items: center;
+  height: 15px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.oi-side { display: flex; height: 9px; }
+.oi-side.is-put { justify-content: flex-end; }
+.oi-side span { height: 100%; border-radius: 2px; }
+.oi-side.is-put span { background: color-mix(in srgb, var(--up) 70%, transparent); }
+.oi-side.is-call span { background: color-mix(in srgb, var(--down) 70%, transparent); }
+.oi-strike { color: var(--muted); text-align: center; }
+.oi-row.is-put-wall .oi-strike, .oi-row.is-call-wall .oi-strike { color: var(--text); font-weight: 800; }
+.oi-row.is-put-wall .oi-side.is-put span { background: var(--up); }
+.oi-row.is-call-wall .oi-side.is-call span { background: var(--down); }
+.oi-price {
+  margin: 3px 0;
+  border-top: 1px dashed var(--muted);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Order book depth: price bands with resting order value. */
+.ob-row {
+  display: grid;
+  grid-template-columns: 92px 1fr 58px;
+  gap: 6px;
+  align-items: center;
+  height: 16px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.ob-price { color: var(--muted); }
+.ob-track { height: 9px; }
+.ob-bar { display: block; height: 100%; border-radius: 2px; }
+.ob-row.is-bid .ob-bar { background: color-mix(in srgb, var(--up) 60%, transparent); }
+.ob-row.is-ask .ob-bar { background: color-mix(in srgb, var(--down) 60%, transparent); }
+.ob-row.is-wall .ob-price, .ob-row.is-wall .ob-value { color: var(--text); font-weight: 800; }
+.ob-row.is-bid.is-wall .ob-bar { background: var(--up); }
+.ob-row.is-ask.is-wall .ob-bar { background: var(--down); }
+.ob-value { color: var(--muted); text-align: right; }
 
 /* ---------- Footer ---------- */
 .foot {

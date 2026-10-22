@@ -1,4 +1,5 @@
 import * as store from '../lib/storage.js';
+import { ext } from '../lib/ext.js';
 import { getFiat, getCoins, usdPerUnit } from '../lib/rates.js';
 import { getHistory, RANGES } from '../lib/history.js';
 import { parseAmountInput, convert, formatAmount, formatRate, pairChange24h, countDigits, amountInputFor } from '../lib/convert.js';
@@ -12,6 +13,8 @@ import { setChangeBadge, ago } from './assets.js';
 import { createCryptoTab } from './crypto-tab.js';
 import { createStocksTab } from './stocks-tab.js';
 import { createFavsTab } from './favs-tab.js';
+import { createStockAnalysisTab } from './stock-analysis-tab.js';
+import { createCryptoAnalysisTab } from './crypto-analysis-tab.js';
 
 const DEFAULT_STATE = {
   amount: '100',
@@ -28,6 +31,9 @@ const DEFAULT_STATE = {
   crypto: { coin: null, from: null, to: null, amount: '1', range: '7d' },
   // Stocks tab: open stock page (null = list) and its chart range.
   stocks: { symbol: null, range: '1d' },
+  // Analysis tabs: the stock and coin being analysed.
+  sanalysis: { symbol: 'AAPL' },
+  canalysis: { coin: 'btc-bitcoin' },
 };
 
 const $ = sel => document.querySelector(sel);
@@ -56,7 +62,9 @@ const els = {
   chartToggle: $('#chart-toggle'),
 };
 
-const TABS = ['convert', 'crypto', 'stocks', 'favs'];
+const TABS = ['convert', 'crypto', 'stocks', 'favs', 'sanalysis', 'canalysis'];
+// Tabs that show coins (the coin list is a ~1.6 MB download, so other tabs skip it).
+const COIN_TABS = new Set(['crypto', 'favs', 'canalysis']);
 
 let state = { ...DEFAULT_STATE };
 let settings;
@@ -140,7 +148,7 @@ function validateState() {
 }
 
 // Coins (a ~1.6 MB list) are only fetched when a tab needs them.
-async function loadData({ force = false, coinsMaxAge, withCoins = state.tab !== 'convert' } = {}) {
+async function loadData({ force = false, coinsMaxAge, withCoins = COIN_TABS.has(state.tab) } = {}) {
   const [f, c] = await Promise.allSettled([
     getFiat({ force }),
     withCoins ? getCoins({ force, maxAge: coinsMaxAge }) : Promise.resolve(coins),
@@ -236,17 +244,23 @@ async function migrateCoins(oldCoins) {
 
 // Brave/Chrome don't grant sites an extension update adds (e.g. Yahoo Finance for Stocks) to an
 // unpacked extension. Detect that and let the user grant them with one click.
-const requiredOrigins = () => globalThis.chrome?.runtime?.getManifest?.().host_permissions ?? [];
+const requiredOrigins = () => ext?.runtime?.getManifest?.().host_permissions ?? [];
+
+/** Whether the extension may fetch from a site (true outside the extension, e.g. a dev preview). */
+async function hasAccess(origin) {
+  if (!ext?.permissions) return true;
+  return ext.permissions.contains({ origins: [origin] }).catch(() => true);
+}
 
 async function checkAccess() {
-  if (!globalThis.chrome?.permissions) return;
-  const ok = await chrome.permissions.contains({ origins: requiredOrigins() }).catch(() => true);
+  if (!ext?.permissions) return;
+  const ok = await ext.permissions.contains({ origins: requiredOrigins() }).catch(() => true);
   els.accessBanner.hidden = ok;
 }
 
 async function grantAccess() {
   try {
-    const granted = await chrome.permissions.request({ origins: requiredOrigins() });
+    const granted = await ext.permissions.request({ origins: requiredOrigins() });
     if (!granted) return;
     els.accessBanner.hidden = true;
     await loadData({ force: true });
@@ -475,6 +489,8 @@ async function refreshActive() {
     case 'crypto': return tabs.crypto.refresh();
     case 'stocks': return tabs.stocks.refresh();
     case 'favs': return tabs.favs.refresh();
+    case 'sanalysis': return tabs.sanalysis.refresh();
+    case 'canalysis': return tabs.canalysis.refresh();
   }
 }
 
@@ -509,6 +525,18 @@ function openStock(symbol) {
   tabs.stocks.openStock(symbol);
 }
 
+function openStockAnalysis(symbol) {
+  state.sanalysis.symbol = symbol;
+  setTab('sanalysis');
+  tabs.sanalysis.analyse(symbol);
+}
+
+function openCryptoAnalysis(id) {
+  state.canalysis.coin = id;
+  setTab('canalysis');
+  tabs.canalysis.analyse(id);
+}
+
 async function copyText(text, btn) {
   try {
     await navigator.clipboard.writeText(text);
@@ -533,6 +561,7 @@ const app = {
   get liveState() { return liveState; },
   get lastLiveTick() { return lastLiveTick; },
   convertKeys,
+  hasAccess,
   copyText,
   displayFiat,
   loadData,
@@ -564,6 +593,12 @@ const tabs = {
   }),
   favs: createFavsTab(app, {
     panel: $('#panel-favs'), rates: $('#fav-rates'), crypto: $('#fav-crypto'), stocks: $('#fav-stocks'), status: $('#favs-status'),
+  }),
+  sanalysis: createStockAnalysisTab(app, {
+    search: $('#sa-search'), results: $('#sa-results'), body: $('#sa-body'), status: $('#sa-status'),
+  }),
+  canalysis: createCryptoAnalysisTab(app, {
+    search: $('#ca-search'), results: $('#ca-results'), body: $('#ca-body'), status: $('#ca-status'),
   }),
 };
 
@@ -638,16 +673,18 @@ function bindEvents() {
   });
 
   els.accessGrant.addEventListener('click', grantAccess);
+  $('#sd-analyse').addEventListener('click', () => openStockAnalysis(state.stocks.symbol));
+  $('#cd-analyse').addEventListener('click', () => openCryptoAnalysis(state.crypto.coin));
 
   $('#open-settings').addEventListener('click', () => {
-    if (globalThis.chrome?.runtime?.openOptionsPage) chrome.runtime.openOptionsPage();
+    if (ext?.runtime?.openOptionsPage) ext.runtime.openOptionsPage();
     else window.open('../options/options.html');
   });
   // Open the in-extension support page (embedded Ko-fi panel) instead of leaving for ko-fi.com.
   $('#kofi').addEventListener('click', e => {
-    if (!globalThis.chrome?.tabs?.create) return;
+    if (!ext?.tabs?.create) return;
     e.preventDefault();
-    chrome.tabs.create({ url: chrome.runtime.getURL('support/support.html') });
+    ext.tabs.create({ url: ext.runtime.getURL('support/support.html') });
     window.close();
   });
 
@@ -669,10 +706,12 @@ async function init() {
     ...saved,
     crypto: { ...DEFAULT_STATE.crypto, ...saved.crypto },
     stocks: { ...DEFAULT_STATE.stocks, ...saved.stocks },
+    sanalysis: { ...DEFAULT_STATE.sanalysis, ...saved.sanalysis },
+    canalysis: { ...DEFAULT_STATE.canalysis, ...saved.canalysis },
   };
   delete state.multi; // the Multi tab was removed
   if (!TABS.includes(state.tab)) state.tab = 'convert';
-  globalThis.chrome?.action?.setBadgeText?.({ text: '' });
+  ext?.action?.setBadgeText?.({ text: '' });
 
   els.amount.value = lastAccepted = state.amount;
   // Render instantly from cache, then refresh from the network.

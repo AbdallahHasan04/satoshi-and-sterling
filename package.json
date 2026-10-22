@@ -1,9 +1,9 @@
 {
   "name": "satoshi-and-sterling",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
-  "description": "Satoshi & Sterling: Chromium currency and crypto converter extension. No build step; package.json is only for running tests.",
+  "description": "Satoshi & Sterling: Chromium extension for currency conversion, crypto and US stocks. No build step; package.json is only for running tests.",
   "scripts": {
     "test": "node --test tests/*.test.js"
   }
