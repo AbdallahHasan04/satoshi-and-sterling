@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Support Satoshi &amp; Sterling</title>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="support.css">
+  <script type="module" src="support.js"></script>
+</head>
+<body>
+  <main class="page">
+    <header class="page-head">
+      <img src="../icons/icon-48.png" alt="" width="40" height="40">
+      <div>
+        <h1>Support Satoshi &amp; Sterling</h1>
+        <p class="sub">Free forever. No ads, no tracking, no locked features.</p>
+      </div>
+    </header>
+
+    <p class="intro">
+      If Satoshi &amp; Sterling saves you time, a small tip helps keep it maintained. You can donate right here.
+      Payments are handled securely by Ko-fi (PayPal or card), and this extension never sees your payment details.
+    </p>
+
+    <div class="panel card">
+      <iframe id="kofi-frame" title="Ko-fi donation panel" loading="eager"
+              allow="payment" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      <div id="frame-loading" class="frame-loading">Loading Ko-fi…</div>
+    </div>
+
+    <p class="fallback">
+      Panel not loading? <a id="kofi-link" target="_blank" rel="noopener">Open my Ko-fi page in a new tab</a>.
+    </p>
+  </main>
+</body>
+</html>

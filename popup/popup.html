@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Satoshi &amp; Sterling</title>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="popup.css">
+  <script type="module" src="popup.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <img src="../icons/icon-32.png" alt="" width="20" height="20">
+      <span>Satoshi &amp; Sterling</span>
+    </div>
+    <a id="kofi" class="kofi" href="../support/support.html" target="_blank" title="Support Satoshi &amp; Sterling on Ko-fi">☕ Support</a>
+    <button type="button" class="icon-btn" id="open-settings" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+    </button>
+  </header>
+
+  <div id="access-banner" class="banner banner--access" role="alert" hidden>
+    <span>Brave hasn’t given Satoshi &amp; Sterling access to its data sources yet, so some prices can’t load.</span>
+    <button type="button" id="access-grant" class="access-btn">Allow</button>
+  </div>
+
+  <div id="banner" class="banner" role="status" hidden>
+    <span id="banner-text"></span>
+    <button type="button" id="banner-retry" class="link-btn">Retry</button>
+  </div>
+
+  <main>
+    <div class="tabs" role="tablist" aria-label="Sections">
+      <button type="button" role="tab" id="tab-convert" data-tab="convert" aria-controls="panel-convert">Currencies</button>
+      <button type="button" role="tab" id="tab-crypto" data-tab="crypto" aria-controls="panel-crypto">Crypto</button>
+      <button type="button" role="tab" id="tab-stocks" data-tab="stocks" aria-controls="panel-stocks">Stocks</button>
+      <button type="button" role="tab" id="tab-favs" data-tab="favs" aria-controls="panel-favs">Favourites</button>
+    </div>
+
+    <section id="panel-convert" role="tabpanel" aria-labelledby="tab-convert">
+      <div id="chips" class="chips" aria-label="Saved and recent pairs" hidden></div>
+
+      <label class="field-label no-gap" for="amount">Amount</label>
+      <div class="amount-wrap" id="amount-wrap">
+        <input id="amount" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"
+               placeholder="0.00" aria-describedby="amount-error">
+      </div>
+      <p id="amount-error" class="field-error" role="alert" hidden></p>
+
+      <div class="field-label" id="from-label">From</div>
+      <div id="from-picker"></div>
+
+      <div class="swap-row">
+        <button type="button" id="swap" class="swap-btn" title="Swap currencies (Alt+S)" aria-label="Swap currencies">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M7 20l-4-4M7 20l4-4M17 20V4M17 4l-4 4M17 4l4 4"/></svg>
+        </button>
+      </div>
+
+      <div class="field-label">To</div>
+      <div id="to-picker"></div>
+
+      <div class="card result">
+        <div class="result-top">
+          <output id="result" for="amount" aria-live="polite">—</output>
+          <div class="result-actions">
+            <button type="button" id="fav" class="icon-btn" aria-pressed="false" title="Add pair to favourites" aria-label="Add pair to favourites">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>
+            </button>
+            <button type="button" id="copy" class="icon-btn" title="Copy result" aria-label="Copy result">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="result-meta">
+          <span id="rate-line"></span>
+          <span id="change" class="change" hidden></span>
+        </div>
+        <div id="status" class="status"></div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-head">
+          <button type="button" id="chart-toggle" class="chart-toggle" aria-expanded="true" aria-controls="chart-body">
+            <span class="chart-toggle-caret" aria-hidden="true"></span>History
+          </button>
+          <span id="chart-change" class="change" hidden></span>
+          <div class="ranges" role="group" aria-label="Chart range">
+            <button type="button" data-range="7d">7D</button>
+            <button type="button" data-range="30d">30D</button>
+            <button type="button" data-range="1y">1Y</button>
+          </div>
+        </div>
+        <div id="chart-body" class="chart-body">
+          <svg id="chart" class="chart-svg" viewBox="0 0 320 110" preserveAspectRatio="none" role="img" aria-label="Price history chart"></svg>
+          <div id="chart-tip" class="chart-tip" hidden></div>
+          <div id="chart-msg" class="chart-msg" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-crypto" role="tabpanel" aria-labelledby="tab-crypto" hidden>
+      <div id="crypto-list-view">
+        <div class="list-tools">
+          <input type="search" id="crypto-search" class="search-input" placeholder="Search coins…" autocomplete="off" spellcheck="false" aria-label="Search coins">
+          <span id="crypto-unit" class="list-unit"></span>
+        </div>
+        <ul id="crypto-list" class="asset-list" aria-label="Cryptocurrencies by market cap"></ul>
+        <div id="crypto-status" class="status"></div>
+      </div>
+
+      <div id="crypto-detail" hidden>
+        <div class="detail-nav">
+          <button type="button" id="cd-back" class="back-btn">‹ All coins</button>
+          <span id="cd-rank" class="detail-rank"></span>
+        </div>
+        <div class="detail-coin">
+          <span id="cd-icon"></span>
+          <div class="detail-title"><b id="cd-name"></b><small id="cd-symbol"></small></div>
+          <button type="button" id="cd-star" class="icon-btn star-btn" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>
+          </button>
+        </div>
+        <div class="detail-price">
+          <span id="cd-price" class="big-price"></span>
+          <span id="cd-change" class="change" hidden></span>
+        </div>
+        <dl id="cd-stats" class="detail-stats"></dl>
+
+        <div class="card chart-card">
+          <div class="chart-head">
+            <span class="chart-label" id="cd-chart-label">Price</span>
+            <span id="cd-chart-change" class="change" hidden></span>
+            <div class="ranges" id="cd-ranges" role="group" aria-label="Chart range">
+              <button type="button" data-range="24h">24H</button>
+              <button type="button" data-range="7d">7D</button>
+              <button type="button" data-range="30d">30D</button>
+              <button type="button" data-range="1y">1Y</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <svg id="cd-chart" class="chart-svg" viewBox="0 0 320 110" preserveAspectRatio="none" role="img" aria-label="Price history chart"></svg>
+            <div id="cd-chart-tip" class="chart-tip" hidden></div>
+            <div id="cd-chart-msg" class="chart-msg" hidden></div>
+          </div>
+        </div>
+
+        <h2 class="section-title">Convert</h2>
+        <div class="card cd-convert">
+          <div class="cd-row">
+            <input id="cd-amount" class="cd-amount" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="Amount" aria-describedby="cd-amount-error">
+            <div id="cd-from-picker" class="cd-picker"></div>
+          </div>
+          <div class="cd-swap-row">
+            <button type="button" id="cd-swap" class="swap-btn" title="Swap" aria-label="Swap currencies">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M7 20l-4-4M7 20l4-4M17 20V4M17 4l-4 4M17 4l4 4"/></svg>
+            </button>
+          </div>
+          <div class="cd-row">
+            <output id="cd-result" class="cd-result" for="cd-amount" aria-live="polite">—</output>
+            <div id="cd-to-picker" class="cd-picker"></div>
+          </div>
+          <p id="cd-amount-error" class="field-error" role="alert" hidden></p>
+          <button type="button" id="cd-copy" class="link-btn cd-copy">Copy result</button>
+        </div>
+
+        <h2 class="section-title" id="cd-rates-title">Exchange rates</h2>
+        <ul id="cd-rates" class="rate-grid"></ul>
+      </div>
+    </section>
+
+    <section id="panel-stocks" role="tabpanel" aria-labelledby="tab-stocks" hidden>
+      <div id="stocks-list-view">
+        <div id="indices" class="indices" aria-label="Market indices"></div>
+        <div id="market-status" class="market-status"></div>
+        <div class="list-tools">
+          <input type="search" id="stock-search" class="search-input" placeholder="Search US stocks &amp; ETFs…" autocomplete="off" spellcheck="false" aria-label="Search US stocks and ETFs">
+        </div>
+        <div id="stock-list-title" class="list-title"></div>
+        <ul id="stock-list" class="asset-list asset-list--short" aria-labelledby="stock-list-title"></ul>
+        <div id="stocks-status" class="status"></div>
+      </div>
+
+      <div id="stock-detail" hidden>
+        <div class="detail-nav">
+          <button type="button" id="sd-back" class="back-btn">‹ All stocks</button>
+          <span id="sd-exchange" class="detail-rank"></span>
+        </div>
+        <div class="detail-coin">
+          <span id="sd-icon"></span>
+          <div class="detail-title"><b id="sd-name"></b><small id="sd-symbol"></small></div>
+          <button type="button" id="sd-star" class="icon-btn star-btn" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>
+          </button>
+        </div>
+        <div class="detail-price">
+          <span id="sd-price" class="big-price"></span>
+          <span id="sd-change" class="change" hidden></span>
+        </div>
+        <div id="sd-session" class="market-status"></div>
+
+        <div class="card chart-card">
+          <div class="chart-head">
+            <span class="chart-label">USD</span>
+            <span id="sd-chart-change" class="change" hidden></span>
+            <div class="ranges ranges--wide" id="sd-ranges" role="group" aria-label="Chart range">
+              <button type="button" data-range="1d">1D</button>
+              <button type="button" data-range="5d">5D</button>
+              <button type="button" data-range="1mo">1M</button>
+              <button type="button" data-range="6mo">6M</button>
+              <button type="button" data-range="1y">1Y</button>
+              <button type="button" data-range="5y">5Y</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <svg id="sd-chart" class="chart-svg" viewBox="0 0 320 110" preserveAspectRatio="none" role="img" aria-label="Stock price chart"></svg>
+            <div id="sd-chart-tip" class="chart-tip" hidden></div>
+            <div id="sd-chart-msg" class="chart-msg" hidden></div>
+          </div>
+        </div>
+
+        <dl id="sd-stats" class="detail-stats detail-stats--after"></dl>
+        <div id="sd-status" class="status"></div>
+      </div>
+    </section>
+
+    <section id="panel-favs" role="tabpanel" aria-labelledby="tab-favs" hidden>
+      <div class="fav-columns">
+        <div class="fav-col">
+          <h2 class="fav-col-title">Rates</h2>
+          <ul id="fav-rates" class="fav-list" aria-label="Favourite exchange rates"></ul>
+        </div>
+        <div class="fav-col">
+          <h2 class="fav-col-title">Crypto</h2>
+          <ul id="fav-crypto" class="fav-list" aria-label="Favourite cryptocurrencies"></ul>
+        </div>
+        <div class="fav-col">
+          <h2 class="fav-col-title">Stocks</h2>
+          <ul id="fav-stocks" class="fav-list" aria-label="Favourite stocks"></ul>
+        </div>
+      </div>
+      <div id="favs-status" class="status"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span class="sources">
+      <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">Rates By Exchange Rate API</a> ·
+      <a href="https://coinpaprika.com" target="_blank" rel="noopener">CoinPaprika</a> ·
+      <a href="https://www.binance.com" target="_blank" rel="noopener">Binance</a> ·
+      <a href="https://finance.yahoo.com" target="_blank" rel="noopener">Yahoo Finance</a>
+    </span>
+  </footer>
+</body>
+</html>

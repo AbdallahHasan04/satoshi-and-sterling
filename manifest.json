@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "Satoshi & Sterling: Currency & Crypto Converter",
+  "version": "1.1.0",
+  "description": "Convert 160+ currencies, track ~2,000 cryptocurrencies and US stocks live, and keep your favourites in one place.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Satoshi & Sterling",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png"
+    }
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://open.er-api.com/*",
+    "https://api.frankfurter.dev/*",
+    "https://cdn.jsdelivr.net/*",
+    "https://query1.finance.yahoo.com/*",
+    "https://query2.finance.yahoo.com/*",
+    "https://api.coinpaprika.com/*",
+    "https://api.binance.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://open.er-api.com/*",
+    "https://api.frankfurter.dev/*",
+    "https://cdn.jsdelivr.net/*",
+    "https://query1.finance.yahoo.com/*",
+    "https://query2.finance.yahoo.com/*",
+    "https://api.coinpaprika.com/*",
+    "https://api.binance.com/*"
+  ],
+  "minimum_chrome_version": "111"
+}

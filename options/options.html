@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Satoshi &amp; Sterling Settings</title>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="options.css">
+  <script type="module" src="options.js"></script>
+</head>
+<body>
+  <main class="page">
+    <header class="page-head">
+      <img src="../icons/icon-48.png" alt="" width="40" height="40">
+      <div>
+        <h1>Satoshi &amp; Sterling</h1>
+        <p class="sub">Settings</p>
+      </div>
+      <span id="saved" class="saved" role="status" hidden>Saved ✓</span>
+    </header>
+
+    <section class="card section">
+      <h2>Appearance</h2>
+      <div class="segmented" role="radiogroup" aria-label="Theme">
+        <label><input type="radio" name="theme" value="system"><span>System</span></label>
+        <label><input type="radio" name="theme" value="light"><span>Light</span></label>
+        <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2>Your currency</h2>
+      <p class="help">Crypto prices and favourites are shown in this currency. It's also the target for right-click conversion:
+        select a price on any page, like <code>$49.99</code> or <code>0.5 BTC</code>, right-click it and choose
+        <strong>Convert</strong>. US stocks are always shown in USD.</p>
+      <div class="field-label" id="home-label">Show prices and convert selections to</div>
+      <div id="home-picker"></div>
+    </section>
+
+    <section class="card section">
+      <h2>Copying</h2>
+      <div class="segmented" role="radiogroup" aria-label="Copy format">
+        <label><input type="radio" name="copyFormat" value="formatted"><span>Formatted <code>€1,234.56</code></span></label>
+        <label><input type="radio" name="copyFormat" value="raw"><span>Number only <code>1234.56</code></span></label>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2>Data</h2>
+      <p class="help">
+        Fiat rates: <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">Rates By Exchange Rate API</a>
+        (updated daily). Crypto prices: <a href="https://coinpaprika.com" target="_blank" rel="noopener">CoinPaprika</a>
+        (live while the popup is open), with charts from <a href="https://www.binance.com" target="_blank" rel="noopener">Binance</a>.
+        US stocks: <a href="https://finance.yahoo.com" target="_blank" rel="noopener">Yahoo Finance</a>. Fiat history:
+        <a href="https://frankfurter.dev" target="_blank" rel="noopener">Frankfurter</a> (European Central Bank).
+      </p>
+      <p class="help">Nothing you convert ever leaves your browser. Rates are cached locally so the extension works offline.</p>
+      <button type="button" id="clear-cache" class="btn">Clear cached rates</button>
+    </section>
+
+    <section class="card section support">
+      <div>
+        <h2>Enjoying Satoshi &amp; Sterling?</h2>
+        <p class="help">It's free, with no ads and no tracking. If it saves you time, you can buy me a coffee.</p>
+      </div>
+      <a class="btn btn-primary" href="../support/support.html">☕ Support on Ko-fi</a>
+    </section>
+  </main>
+</body>
+</html>
