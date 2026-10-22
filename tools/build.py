@@ -16,7 +16,11 @@ DIST = ROOT / 'dist'
 INCLUDE = ['background', 'icons', 'lib', 'options', 'popup', 'styles', 'support']
 
 FIREFOX_ID = 'satoshi-and-sterling@abdallahhasan'
-FIREFOX_MIN_VERSION = '140.0'  # first version with the data_collection_permissions key
+FIREFOX_MIN_VERSION = '140.0'          # first desktop version with the data_collection_permissions key
+FIREFOX_ANDROID_MIN_VERSION = '142.0'  # first Android version with it
+# addons.mozilla.org allows at most 45 characters (the Chrome Web Store allows 75).
+FIREFOX_NAME = 'Satoshi & Sterling: Currency, Crypto & Stocks'
+assert len(FIREFOX_NAME) <= 45, f'Firefox name is {len(FIREFOX_NAME)} characters; the limit is 45'
 
 
 def extension_files():
@@ -28,6 +32,7 @@ def extension_files():
 
 def firefox_manifest(manifest):
     m = dict(manifest)
+    m['name'] = FIREFOX_NAME
     # Firefox runs background scripts (an event page) rather than a service worker.
     m['background'] = {'scripts': [manifest['background']['service_worker']], 'type': 'module'}
     m.pop('minimum_chrome_version', None)
@@ -40,6 +45,8 @@ def firefox_manifest(manifest):
             'strict_min_version': FIREFOX_MIN_VERSION,
             'data_collection_permissions': {'required': ['none']},
         },
+        # Also installable on Firefox for Android (right-click Convert is desktop-only there).
+        'gecko_android': {'strict_min_version': FIREFOX_ANDROID_MIN_VERSION},
     }
     return m
 

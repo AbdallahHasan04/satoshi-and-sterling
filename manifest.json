@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Satoshi & Sterling: Currency Converter, Crypto & Stocks",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Convert 160+ currencies, track ~2,000 cryptocurrencies and US stocks live, and keep your favourites in one place.",
   "icons": {
     "16": "icons/icon-16.png",

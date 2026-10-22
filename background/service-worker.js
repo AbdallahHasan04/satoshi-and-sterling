@@ -9,17 +9,20 @@ import { MAX_DIGITS } from '../lib/config.js';
 
 const MENU_ID = 'convert-selection';
 
-ext.runtime.onInstalled.addListener(() => {
-  ext.contextMenus.create({ id: MENU_ID, title: 'Convert “%s”', contexts: ['selection'] });
-});
-
-ext.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId !== MENU_ID) return;
-  convertSelection(info.selectionText ?? '', tab).catch(err => {
-    console.error(err);
-    notify(tab, { title: 'Conversion failed', detail: String(err.message ?? err), error: true });
+// Firefox for Android has no context menus, so right-click Convert only exists on desktop.
+if (ext.contextMenus) {
+  ext.runtime.onInstalled.addListener(() => {
+    ext.contextMenus.create({ id: MENU_ID, title: 'Convert “%s”', contexts: ['selection'] });
   });
-});
+
+  ext.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId !== MENU_ID) return;
+    convertSelection(info.selectionText ?? '', tab).catch(err => {
+      console.error(err);
+      notify(tab, { title: 'Conversion failed', detail: String(err.message ?? err), error: true });
+    });
+  });
+}
 
 const shorten = text => (text.length > 40 ? `${text.slice(0, 40)}…` : text);
 

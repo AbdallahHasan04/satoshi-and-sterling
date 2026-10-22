@@ -242,7 +242,7 @@ async function migrateCoins(oldCoins) {
 
 /* ---------- Site access ---------- */
 
-// Brave/Chrome don't grant sites an extension update adds (e.g. Yahoo Finance for Stocks) to an
+// Browsers don't always grant sites an extension update adds (e.g. Yahoo Finance for Stocks) to an
 // unpacked extension. Detect that and let the user grant them with one click.
 const requiredOrigins = () => ext?.runtime?.getManifest?.().host_permissions ?? [];
 
@@ -267,7 +267,7 @@ async function grantAccess() {
     refreshActive();
   } catch {
     els.accessBanner.firstElementChild.textContent =
-      'Brave wouldn’t ask for access from here. In brave://extensions, remove Satoshi & Sterling and click “Load unpacked” again.';
+      'Your browser wouldn’t ask for access from here. Remove Satoshi & Sterling from your extensions and install it again to grant access.';
     els.accessGrant.hidden = true;
   }
 }
@@ -696,6 +696,9 @@ function bindEvents() {
 }
 
 /* ---------- Start ---------- */
+
+// On phones (Firefox for Android) the popup opens full screen instead of as a 360px panel.
+if (/Android|Mobile/i.test(navigator.userAgent)) document.documentElement.classList.add('is-mobile');
 
 async function init() {
   settings = await getSettings();

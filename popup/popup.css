@@ -2,6 +2,11 @@ body {
   width: 360px;
   min-height: 300px;
 }
+/* Phones: fill the screen instead of a fixed-width panel. */
+.is-mobile body { width: auto; max-width: 640px; margin: 0 auto; }
+.is-mobile .tabs button { padding: 9px 4px; }
+.is-mobile .asset-list { max-height: none; }
+.is-mobile .asset-list--short { max-height: none; }
 
 /* ---------- Header ---------- */
 .top {

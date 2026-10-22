@@ -54,6 +54,8 @@ The extension isn't on the Chrome Web Store yet. To try it:
 2. Open `brave://extensions` (or `chrome://extensions`) and turn on **Developer mode**.
 3. Click **Load unpacked** and select the unzipped folder.
 
+**On Android (Microsoft Edge Canary):** download the `.crx` file from the latest release. In Edge Canary, open **Settings → About Microsoft Edge** and tap the build number about five times to turn on **Developer options**. Then go to **Settings → Developer options → Extension install by crx** and pick the file. Everything works on Android except right-click Convert, since phones have no right-click menu.
+
 ## Data sources
 
 All the data comes from free public sources:
