@@ -2,7 +2,7 @@ import { getQuotes, searchStocks, marketSession, getStockChart, STOCK_RANGES } f
 import { INDICES, POPULAR_STOCKS } from '../lib/config.js';
 import { drawChart, clearChart } from './chart.js';
 import {
-  changeBadge, setChangeBadge, starButton, nameBlock, priceBlock, tickerBadge, emptyRow, ago, setStatus, setLiveText,
+  changeBadge, setChangeBadge, starButton, nameBlock, priceBlock, extPrice, tickerBadge, emptyRow, ago, setStatus, setLiveText,
 } from './assets.js';
 
 const usdFmt = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
@@ -153,7 +153,7 @@ export function createStocksTab(app, els) {
     main.append(
       tickerBadge(symbol),
       nameBlock(symbol, name),
-      priceBlock(q ? usdFmt.format(q.price) : '—', q?.changePct),
+      priceBlock(q ? usdFmt.format(q.price) : '—', q?.changePct, q?.ext && extPrice(q.ext, usdFmt.format(q.ext.price), { short: true })),
     );
     li.append(main, starButton(fav, symbol));
     return li;
@@ -210,15 +210,23 @@ export function createStocksTab(app, els) {
       if (token !== chartToken) return;
       if (points.length < 2) return chartMsg('No chart data for this range.');
       const q = quotes[symbol];
-      // On 1D, measure from yesterday's close (the dashed line), like most finance apps.
-      const baseline = range === '1d' ? q?.prevClose : undefined;
-      if (range === '1d' && q?.price) points.push([q.time || Date.now(), q.price]);
+      const intraday = range === '1d';
+      // On 1D, measure from the previous close (the dashed line), like most finance apps. Before the
+      // open, the chart shows today's pre-market, so that's the last regular close.
+      const baseline = intraday ? (marketSession(q?.period)?.state === 'pre' ? q?.price : q?.prevClose) : undefined;
+      // End the 1D line at the latest trade, which may be newer than the last 5-minute candle.
+      const latest = q?.ext ?? (q?.price ? { price: q.price, time: q.time || Date.now() } : null);
+      if (intraday && latest && latest.time > points[points.length - 1][0]) points.push([latest.time, latest.price]);
+      // Tint the pre-market and after-hours parts of the 1D chart.
+      const p = q?.period;
+      const shade = intraday && p?.regular ? [[(p.pre?.start ?? 0) * 1000, p.regular.start * 1000], [p.regular.end * 1000, (p.post?.end ?? p.regular.end) * 1000]] : [];
       els.chartMsg.hidden = true;
-      const fmt = range === '1d' || range === '5d' ? chartTimeFmt.short : chartTimeFmt.long;
+      const fmt = intraday || range === '5d' ? chartTimeFmt.short : chartTimeFmt.long;
       const pct = drawChart(els.chart, els.chartTip, points, {
         formatValue: v => money(symbol, v),
         formatTime: t => fmt.format(t),
         baseline,
+        shade,
       });
       els.chartChange.hidden = false;
       setChangeBadge(els.chartChange, pct, STOCK_RANGES[range].label);
@@ -260,9 +268,18 @@ export function createStocksTab(app, els) {
     els.star.setAttribute('aria-pressed', String(fav));
     els.star.title = els.star.ariaLabel = fav ? `Remove ${symbol} from favourites` : `Add ${symbol} to favourites`;
     setLiveText(els.price, q ? money(symbol, q.price) : '—', q?.price);
-    els.change.hidden = q?.changePct == null;
-    if (q?.changePct != null) setChangeBadge(els.change, q.changePct, 'today');
     const session = marketSession(q?.period);
+    els.change.hidden = q?.changePct == null;
+    // Outside regular hours the main price is the last close; the extended-hours trade shows below it.
+    if (q?.changePct != null) setChangeBadge(els.change, q.changePct, session && session.state !== 'open' ? 'at close' : 'today');
+    els.ext.hidden = !q?.ext;
+    if (q?.ext) {
+      const line = extPrice(q.ext, money(symbol, q.ext.price));
+      const at = document.createElement('small');
+      at.textContent = `${etFmt.format(q.ext.time)} ET`;
+      line.append(at);
+      els.ext.replaceChildren(line);
+    }
     els.session.textContent = sessionText(session);
     els.session.dataset.state = session?.state ?? '';
     for (const btn of els.ranges.querySelectorAll('button')) btn.setAttribute('aria-pressed', String(btn.dataset.range === range));

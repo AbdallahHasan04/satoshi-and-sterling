@@ -7,9 +7,11 @@ const PAD_Y = 8;
  * Draws `points` ([[timeMs, value]], sorted by time) into `svg`.
  * `baseline` (optional) draws a dashed reference line, e.g. the previous close, and the trend
  * color and returned change are measured from it.
+ * `shade` (optional) is a list of [startMs, endMs] spans drawn with a tinted background, e.g. the
+ * pre-market and after-hours sessions.
  * Returns the % change from the baseline (or first point) to the last point.
  */
-export function drawChart(svg, tip, points, { formatValue, formatTime, baseline }) {
+export function drawChart(svg, tip, points, { formatValue, formatTime, baseline, shade = [] }) {
   const t0 = points[0][0];
   const t1 = points[points.length - 1][0];
   let min = Infinity;
@@ -23,6 +25,11 @@ export function drawChart(svg, tip, points, { formatValue, formatTime, baseline 
   const coords = points.map(([t, v]) => [x(t), y(v)]);
   const line = coords.map(([px, py], i) => `${i ? 'L' : 'M'}${px.toFixed(1)},${py.toFixed(1)}`).join('');
   const area = `${line}L${W},${H}L0,${H}Z`;
+  const spans = shade
+    .map(([a, b]) => [x(Math.max(a, t0)), x(Math.min(b, t1))])
+    .filter(([a, b]) => b > a)
+    .map(([a, b]) => `<rect class="chart-shade" x="${a.toFixed(1)}" y="0" width="${(b - a).toFixed(1)}" height="${H}"/>`)
+    .join('');
 
   const first = baseline > 0 ? baseline : points[0][1];
   const last = points[points.length - 1][1];
@@ -32,6 +39,7 @@ export function drawChart(svg, tip, points, { formatValue, formatTime, baseline 
     <defs><linearGradient id="${fillId}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" class="chart-stop-a"/><stop offset="1" class="chart-stop-b"/>
     </linearGradient></defs>
+    ${spans}
     <path class="chart-area" d="${area}" fill="url(#${fillId})"/>
     ${baseline > 0 ? `<line class="chart-baseline" x1="0" x2="${W}" y1="${y(baseline).toFixed(1)}" y2="${y(baseline).toFixed(1)}"/>` : ''}
     <path class="chart-line" d="${line}"/>

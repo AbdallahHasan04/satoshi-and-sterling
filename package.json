@@ -1,6 +1,6 @@
 {
   "name": "satoshi-and-sterling",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "private": true,
   "type": "module",
   "description": "Satoshi & Sterling: Chromium extension for currency conversion, crypto and US stocks. No build step; package.json is only for running tests.",

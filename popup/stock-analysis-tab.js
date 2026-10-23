@@ -1,11 +1,13 @@
 import { yahooCandles } from '../lib/candles.js';
 import { technicals } from '../lib/indicators.js';
-import { getFinancials, analyzeFundamentals } from '../lib/fundamentals.js';
+import { getFinancials, analyzeFundamentals, getMarketInputs } from '../lib/fundamentals.js';
 import { getOptionChain, analyzeOptions } from '../lib/walls.js';
-import { searchStocks } from '../lib/stocks.js';
+import { getAnalystView } from '../lib/analysts.js';
+import { searchStocks, getQuotes } from '../lib/stocks.js';
 import { technicalSections, fundamentalSections, optionsSection, score, money } from '../lib/analysis.js';
-import { scoreCard, sectionCard, optionsChart, header, message } from './analysis-view.js';
-import { ago, setStatus } from './assets.js';
+import { technicalRating, starRating, uncertaintyFromVolatility, annualVolatility, piotroski } from '../lib/ratings.js';
+import { ratingsCard, HOW_STOCK, sectionCard, optionsChart, header, message } from './analysis-view.js';
+import { ago, setStatus, extPrice } from './assets.js';
 
 const isIndex = symbol => symbol.startsWith('^');
 
@@ -19,14 +21,16 @@ export function createStockAnalysisTab(app, els) {
   let loading = false;
   let token = 0;
   let results = [];
+  let resultsFor = ''; // the search text `results` belong to
   let searchTimer;
   let searchToken = 0;
   const names = new Map();
 
   /* ---------- Search ---------- */
 
-  function showResults(list) {
+  function showResults(list, query = '') {
     results = list;
+    resultsFor = query;
     els.results.hidden = !list.length;
     els.results.replaceChildren(...list.map(r => {
       const li = document.createElement('li');
@@ -51,7 +55,7 @@ export function createStockAnalysisTab(app, els) {
       const t = ++searchToken;
       try {
         const found = await searchStocks(q);
-        if (t === searchToken) showResults(found.slice(0, 6));
+        if (t === searchToken) showResults(found.slice(0, 6), q);
       } catch {
         if (t === searchToken) showResults([]);
       }
@@ -59,8 +63,10 @@ export function createStockAnalysisTab(app, els) {
   });
   els.search.addEventListener('keydown', e => {
     if (e.key !== 'Enter') return;
-    const q = els.search.value.trim().toUpperCase();
-    if (results[0]) analyse(results[0].symbol, results[0].name);
+    const text = els.search.value.trim();
+    const q = text.toUpperCase();
+    // Only use the results if they're for what's typed now (the search may still be running).
+    if (results[0] && resultsFor === text) analyse(results[0].symbol, results[0].name);
     else if (/^[A-Z.^-]{1,10}$/.test(q)) analyse(q);
   });
   els.results.addEventListener('click', e => {
@@ -70,6 +76,8 @@ export function createStockAnalysisTab(app, els) {
 
   function analyse(symbol, name) {
     if (name) names.set(symbol, name);
+    clearTimeout(searchTimer);
+    searchToken++; // drop any search still in flight
     sa().symbol = symbol;
     app.save();
     els.search.value = '';
@@ -86,11 +94,14 @@ export function createStockAnalysisTab(app, els) {
     const t = ++token;
     loading = true;
     render();
-    const [daily, intraday, fin, chain] = await Promise.allSettled([
+    const [daily, intraday, quote, fin, chain, mkt, analyst] = await Promise.allSettled([
       yahooCandles(symbol, '1y', '1d', 5 * 60e3),
       yahooCandles(symbol, '1d', '5m', intradayTtl),
+      getQuotes([symbol], { maxAge: intradayTtl }), // for the pre-market / after-hours price
       isIndex(symbol) ? Promise.resolve(null) : getFinancials(symbol),
       isIndex(symbol) ? Promise.resolve(null) : getOptionChain(symbol),
+      isIndex(symbol) ? Promise.resolve(null) : getMarketInputs(symbol), // DCF discount rate
+      isIndex(symbol) ? Promise.resolve(null) : getAnalystView(symbol),
     ]);
     if (t !== token) return;
     loading = false;
@@ -101,12 +112,19 @@ export function createStockAnalysisTab(app, els) {
     const tech = technicals(daily.value, intraday.status === 'fulfilled' ? intraday.value : []);
     const prevClose = daily.value.length > 1 ? daily.value[daily.value.length - 2].c : null;
     const finData = fin.status === 'fulfilled' ? fin.value : null;
+    const analystView = analyst.status === 'fulfilled' ? analyst.value : undefined;
+    const fund = finData ? analyzeFundamentals(finData, tech.price, mkt.status === 'fulfilled' ? mkt.value : null, analystView) : null;
     data = {
       symbol,
       tech,
       changePct: prevClose ? ((tech.price - prevClose) / prevClose) * 100 : null,
+      ext: quote.status === 'fulfilled' ? quote.value.quotes[symbol]?.ext ?? null : null,
       fin: finData,
-      fund: finData ? analyzeFundamentals(finData, tech.price) : null,
+      fund,
+      techRating: technicalRating(daily.value),
+      analyst: analystView,
+      stars: fund ? starRating(tech.price, fund.fairValue, uncertaintyFromVolatility(annualVolatility(daily.value))) : null,
+      fscore: finData?.years ? piotroski(...finData.years) : null,
       finError: fin.status === 'rejected',
       // Missing site access (e.g. after an update added the source) shows a specific message.
       secBlocked: fin.status === 'rejected' && !(await app.hasAccess('https://data.sec.gov/*')),
@@ -144,9 +162,10 @@ export function createStockAnalysisTab(app, els) {
         subtitle: symbol,
         price: money(tech.price),
         changePct: data.changePct,
+        extra: data.ext && extPrice(data.ext, money(data.ext.price)),
         action: { label: 'Stock page ›', onClick: () => app.openStock(symbol) },
       }),
-      scoreCard(score(sections)),
+      ratingsCard({ tech: data.techRating, analyst: data.analyst, price: tech.price, stars: data.stars, bank: !!fund?.isFinancial, fscore: data.fscore, checks: score(sections), stock: !isIndex(symbol), how: HOW_STOCK }),
     ];
     for (const s of sections) {
       nodes.push(sectionCard(s));

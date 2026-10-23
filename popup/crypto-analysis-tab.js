@@ -2,7 +2,8 @@ import { binanceCandles } from '../lib/candles.js';
 import { technicals } from '../lib/indicators.js';
 import { getOrderBook, analyzeOrderBook } from '../lib/walls.js';
 import { technicalSections, orderBookSection, coinMarketSection, score, money } from '../lib/analysis.js';
-import { scoreCard, sectionCard, depthChart, header, message } from './analysis-view.js';
+import { technicalRating } from '../lib/ratings.js';
+import { ratingsCard, HOW_COIN, sectionCard, depthChart, header, message } from './analysis-view.js';
 import { ago, setStatus } from './assets.js';
 
 /**
@@ -88,6 +89,7 @@ export function createCryptoAnalysisTab(app, els) {
       id,
       onBinance: dailyOk,
       tech: dailyOk ? technicals(daily.value, day) : null,
+      techRating: dailyOk ? technicalRating(daily.value) : null,
       book: dailyOk && book.status === 'fulfilled' ? analyzeOrderBook(book.value.bids, book.value.asks) : null,
       fetched: Date.now(),
       bookFetched: Date.now(),
@@ -128,7 +130,7 @@ export function createCryptoAnalysisTab(app, els) {
       orderBookSection(data.book, fmt),
       coinMarketSection(coin),
     ].filter(Boolean);
-    nodes.push(scoreCard(score(sections)));
+    nodes.push(ratingsCard({ tech: data.techRating, checks: score(sections), how: HOW_COIN }));
     for (const s of sections) {
       nodes.push(sectionCard(s));
       if (s.title === 'Order book walls' && data.book) nodes.push(depthChart(data.book, fmt));

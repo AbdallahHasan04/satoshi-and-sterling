@@ -587,7 +587,7 @@ const tabs = {
     listView: $('#stocks-list-view'), indices: $('#indices'), market: $('#market-status'), search: $('#stock-search'),
     title: $('#stock-list-title'), list: $('#stock-list'), status: $('#stocks-status'),
     detail: $('#stock-detail'), back: $('#sd-back'), exchange: $('#sd-exchange'), icon: $('#sd-icon'), name: $('#sd-name'),
-    symbol: $('#sd-symbol'), star: $('#sd-star'), price: $('#sd-price'), change: $('#sd-change'), session: $('#sd-session'),
+    symbol: $('#sd-symbol'), star: $('#sd-star'), price: $('#sd-price'), change: $('#sd-change'), ext: $('#sd-ext'), session: $('#sd-session'),
     chart: $('#sd-chart'), chartTip: $('#sd-chart-tip'), chartMsg: $('#sd-chart-msg'), chartChange: $('#sd-chart-change'),
     ranges: $('#sd-ranges'), stats: $('#sd-stats'), detailStatus: $('#sd-status'),
   }),

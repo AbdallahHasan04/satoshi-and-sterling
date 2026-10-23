@@ -3,7 +3,7 @@ import { coinKey, isCrypto, coinId } from '../lib/currencies.js';
 import { refreshCoinPrices } from '../lib/rates.js';
 import { getQuotes } from '../lib/stocks.js';
 import { iconNode } from './picker.js';
-import { changeBadge, setChangeBadge, removeButton, tickerBadge, emptyRow, ago, setStatus, setLiveText } from './assets.js';
+import { changeBadge, setChangeBadge, extPrice, removeButton, tickerBadge, emptyRow, ago, setStatus, setLiveText } from './assets.js';
 
 const usdFmt = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
 
@@ -40,7 +40,7 @@ export function createFavsTab(app, els) {
     if (kind === 'stock') app.openStock(id);
   });
 
-  function card(kind, id, { icon, title, value, change, label }) {
+  function card(kind, id, { icon, title, value, change, label, extra }) {
     const li = document.createElement('li');
     li.className = 'fav-item';
     li.dataset.kind = kind;
@@ -59,6 +59,7 @@ export function createFavsTab(app, els) {
     v.className = 'fav-card-value';
     v.textContent = value;
     btn.append(head, v, changeBadge(change));
+    if (extra) btn.append(extra);
     li.append(btn, removeButton(title));
     return li;
   }
@@ -102,6 +103,7 @@ export function createFavsTab(app, els) {
         title: symbol,
         value: q ? usdFmt.format(q.price) : '—',
         change: q?.changePct,
+        extra: q?.ext && extPrice(q.ext, usdFmt.format(q.ext.price), { short: true }),
         label: `${q?.name ?? symbol}: live price and chart`,
       });
     });

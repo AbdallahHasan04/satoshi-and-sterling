@@ -286,6 +286,7 @@ main { padding: 12px 14px 4px; }
 }
 .chart-svg[data-trend="down"] .chart-line { stroke: var(--down); }
 .chart-stop-a { stop-color: var(--up); stop-opacity: 0.28; }
+.chart-shade { fill: var(--muted); opacity: 0.09; }
 .chart-stop-b { stop-color: var(--up); stop-opacity: 0; }
 .chart-svg[data-trend="down"] .chart-stop-a, .chart-svg[data-trend="down"] .chart-stop-b { stop-color: var(--down); }
 .chart-baseline { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 4; opacity: 0.7; vector-effect: non-scaling-stroke; }
@@ -423,6 +424,23 @@ button.asset-main:hover { background: var(--surface-2); }
 }
 .asset-price b { font-size: 13px; }
 .asset-price .change { padding: 0 5px; font-size: 11px; }
+/* Pre-market / after-hours price under a stock's regular price. */
+.ext-price {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 10.5px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ext-price b { color: var(--text); font-size: 11px; font-weight: 600; }
+.asset-price .ext-price .change, .fav-card .ext-price .change { padding: 0 4px; font-size: 10px; }
+.fav-card .ext-price { flex-wrap: wrap; row-gap: 1px; white-space: normal; }
+.detail-ext { margin: -4px 0 6px; }
+.detail-ext .ext-price { gap: 6px; font-size: 12px; }
+.detail-ext .ext-price b { font-size: 14px; }
+.detail-ext small { color: var(--muted); font-size: 11px; }
 .star-btn { width: 30px; height: 30px; flex: none; }
 .star-btn svg { width: 16px; height: 16px; }
 .star-btn[aria-pressed="true"] { color: var(--accent); }
@@ -755,17 +773,81 @@ button.asset-main:hover { background: var(--surface-2); }
 .an-head-text small { color: var(--muted); font: 600 12px var(--mono); }
 .an-head-price { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-variant-numeric: tabular-nums; }
 .an-head-price b { font-size: 18px; }
-.an-open { grid-column: 1 / -1; justify-self: start; font-size: 12px; }
+.an-head-foot { display: flex; grid-column: 1 / -1; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; }
+.an-head-foot .ext-price { margin-left: auto; font-size: 12px; }
+.an-head-foot .ext-price b { font-size: 13px; }
+.an-open { font-size: 12px; }
 
-.an-score { padding: 10px 12px; }
-.an-score-head { display: flex; justify-content: space-between; align-items: baseline; }
-.an-score-pct { color: var(--muted); font-weight: 700; }
-.an-bar { height: 7px; margin: 7px 0 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
-.an-bar span { display: block; height: 100%; border-radius: inherit; }
-.an-bar .is-good { background: var(--up); }
-.an-bar .is-mid { background: var(--warn); }
-.an-bar .is-bad { background: var(--down); }
 .an-disclaimer { margin: 0; color: var(--muted); font-size: 11px; }
+
+/* Ratings */
+.an-rating { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; }
+.an-rating-part { display: flex; flex-direction: column; gap: 6px; }
+.an-rating-part + .an-rating-part { padding-top: 8px; border-top: 1px solid var(--border); }
+.an-part-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.an-part-title { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.an-part-head small { color: var(--muted); font-size: 10.5px; }
+.an-part-note { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.an-checks { padding-top: 8px; border-top: 1px solid var(--border); }
+.an-rating-head { display: flex; align-items: baseline; gap: 8px; }
+.an-verdict {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 14px;
+}
+[data-tone="buy"] > .an-rating-head .an-verdict { background: color-mix(in srgb, var(--up) 18%, transparent); color: var(--up); }
+[data-tone="sell"] > .an-rating-head .an-verdict { background: color-mix(in srgb, var(--down) 18%, transparent); color: var(--down); }
+.an-rating-num { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.an-rating-checks { margin-left: auto; color: var(--muted); font-size: 11px; text-align: right; }
+.an-scale {
+  position: relative;
+  height: 8px;
+  margin: 2px 0 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    var(--down) 0%,
+    color-mix(in srgb, var(--down) 45%, var(--surface-2)) 30%,
+    var(--surface-2) 50%,
+    color-mix(in srgb, var(--up) 45%, var(--surface-2)) 70%,
+    var(--up) 100%);
+}
+.an-scale-marker {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--bg);
+  border-radius: 50%;
+  background: var(--text);
+  box-shadow: 0 0 0 1px var(--border);
+  transform: translate(-50%, -50%);
+}
+.an-scale-labels { position: relative; height: 14px; color: var(--muted); font-size: 10px; }
+.an-scale-labels span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.an-scale-labels .is-current { color: var(--text); font-weight: 700; }
+.an-tech-groups { display: grid; grid-template-columns: auto auto 1fr; align-items: baseline; gap: 3px 10px; }
+.an-group-name { color: var(--muted); font-size: 11.5px; }
+.an-counts { color: var(--muted); font-size: 11px; text-align: right; font-variant-numeric: tabular-nums; }
+.an-tone { color: var(--muted); font-size: 12px; }
+.an-tone.is-buy { color: var(--up); }
+.an-tone.is-sell { color: var(--down); }
+.an-stars-line { display: flex; align-items: baseline; gap: 8px; }
+.an-dist { display: flex; overflow: hidden; height: 16px; border-radius: 4px; font-size: 10px; font-weight: 700; line-height: 16px; text-align: center; }
+.an-dist span { min-width: 14px; color: #fff; }
+.an-dist .is-0 { background: var(--up); }
+.an-dist .is-1 { background: color-mix(in srgb, var(--up) 60%, var(--surface-2)); }
+.an-dist .is-2 { background: var(--surface-2); color: var(--muted); }
+.an-dist .is-3 { background: color-mix(in srgb, var(--down) 60%, var(--surface-2)); }
+.an-dist .is-4 { background: var(--down); }
+.an-stars { color: var(--warn); font-size: 16px; letter-spacing: 1px; }
+.an-tests { margin: 4px 0 0; padding: 0; list-style: none; font-size: 11px; line-height: 1.6; }
+.an-tests .is-pass { color: var(--up); }
+.an-tests .is-fail { color: var(--down); }
+.an-tests .is-info { color: var(--muted); }
+.an-how summary { color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; }
+.an-how p { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
 
 .an-section { padding: 8px 12px 10px; }
 .an-title {

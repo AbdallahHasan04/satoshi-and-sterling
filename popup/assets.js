@@ -48,10 +48,25 @@ export function nameBlock(code, name) {
   return wrap;
 }
 
-export function priceBlock(price, pct) {
+export function priceBlock(price, pct, extra) {
   const wrap = el('span', 'asset-price');
   wrap.append(el('b', '', price), changeBadge(pct));
+  if (extra) wrap.append(extra);
   return wrap;
+}
+
+export const extLabel = session => (session === 'pre' ? 'Pre-market' : 'After hours');
+
+/**
+ * A stock's pre-market or after-hours price with its change from the last close, e.g.
+ * "After hours $348.01 ▼ 0.06%". `short` uses "Pre"/"After" for narrow rows and cards.
+ */
+export function extPrice(ext, priceText, { short = false } = {}) {
+  const node = el('span', 'ext-price');
+  node.title = `${extLabel(ext.session)}: ${priceText}, ${ext.changePct >= 0 ? 'up' : 'down'} ${Math.abs(ext.changePct).toFixed(2)}% from the last close`;
+  const label = short ? (ext.session === 'pre' ? 'Pre' : 'After') : extLabel(ext.session);
+  node.append(el('span', 'ext-label', label), el('b', '', priceText), changeBadge(ext.changePct));
+  return node;
 }
 
 export function tickerBadge(symbol) {
